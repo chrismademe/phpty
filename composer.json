@@ -1,0 +1,14 @@
+{
+    "name": "chrisgalbraith/phpty",
+    "description": "A PHP static site generator, inspired by 11ty.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chris Galbraith",
+            "email": "chris@resknow.co.uk"
+        }
+    ],
+    "require": {
+        "twig/twig": "^3.3"
+    }
+}
