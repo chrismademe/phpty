@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPty;
+namespace Staple;
 
-class PHPty {
+class Staple {
 
     public $config;
     public $filters;
@@ -16,7 +16,7 @@ class PHPty {
 
     private function loadConfig() {
         $config = new Config();
-        $userConfigFile = __DIR__ . '/../../phpty.config.php';
+        $userConfigFile = __DIR__ . '/../../staple.config.php';
 
         if ( is_readable($userConfigFile) ) {
             $userConfigFunction = require_once $userConfigFile;

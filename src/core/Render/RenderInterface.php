@@ -1,12 +1,12 @@
 <?php
 
-namespace PHPty\Render;
+namespace Staple\Render;
 
-use PHPty\PHPty;
+use Staple\Staple;
 
 interface RenderInterface {
 
-    public function __construct( PHPty $instance );
+    public function __construct( Staple $instance );
     public function render( string $template, array $context = [] );
 
 }

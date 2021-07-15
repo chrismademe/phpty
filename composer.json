@@ -1,5 +1,5 @@
 {
-	"name": "chrisgalbraith/phpty",
+	"name": "chrismademe/staple",
 	"description": "A PHP static site generator, inspired by 11ty.",
 	"license": "MIT",
 	"authors": [
@@ -15,7 +15,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"PHPty\\": "src/core/"
+			"Staple\\": "src/core/"
 		}
 	}
 }

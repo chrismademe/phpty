@@ -1,12 +1,12 @@
 <?php
 
-namespace PHPty\Render;
+namespace Staple\Render;
 
-use PHPty\PHPty;
+use Staple\Staple;
 
 class PHP implements RenderInterface {
 
-    public function __construct(PHPty $instance) {
+    public function __construct(Staple $instance) {
         $this->instance = $instance;
     }
 

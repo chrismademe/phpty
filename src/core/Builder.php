@@ -1,15 +1,15 @@
 <?php
 
-namespace PHPty;
+namespace Staple;
 
-use PHPty\Render\PHP;
-use PHPty\Render\Twig;
+use Staple\Render\PHP;
+use Staple\Render\Twig;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Builder {
 
-    public function __construct(PHPty $instance) {
+    public function __construct(Staple $instance) {
         $this->instance = $instance;
         $this->config = $instance->config;
     }

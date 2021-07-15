@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPty\Render;
+namespace Staple\Render;
 
-use PHPty\PHPty;
+use Staple\Staple;
 use Twig\Loader\ArrayLoader;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
@@ -12,7 +12,7 @@ class Twig implements RenderInterface {
 
     private $twig;
 
-    public function __construct(PHPty $instance) {
+    public function __construct(Staple $instance) {
         $this->instance = $instance;
     }
 
