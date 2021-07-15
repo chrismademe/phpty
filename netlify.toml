@@ -2,5 +2,5 @@
 
 PHP_VERSION=7.3
 
-command = "php ty"
+command = "php phpty.php"
 publish = "output"
