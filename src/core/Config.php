@@ -14,6 +14,17 @@ class Config {
         $this->config['plugins'][] = $plugin;
     }
 
+    public function addPassthroughCopy( string $path ) {
+
+        // Make sure the file exists
+        if ( !file_exists($path) ) {
+            Console::warn(sprintf('File or Directory "%s" wasn\'t found, skipping copy.', $path));
+            return;
+        }
+
+        $this->config['passthrough'][] = $path;
+    }
+
     public function __set( string $key, $value ) {
         $this->config[$key] = $value;
     }

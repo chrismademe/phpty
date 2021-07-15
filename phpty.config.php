@@ -5,5 +5,8 @@ return function($config) {
         echo 'I plugin did things';
     } );
 
+    $config->addPassthroughCopy( $config->inputDir . '/assets' );
+    $config->addPassthroughCopy( 'favicon.ico' );
+
     $config->example = 'Example data';
 };

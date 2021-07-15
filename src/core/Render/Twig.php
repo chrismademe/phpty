@@ -8,7 +8,7 @@ use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
 use Twig\Environment;
 
-class Twig {
+class Twig implements RenderInterface {
 
     private $twig;
 
@@ -19,17 +19,22 @@ class Twig {
     /**
      * Render
      *
-     * @param string $template Template Name
+     * @param string $template Template Content
      * @param array $context Context array
      */
     public function render( string $template, array $context = [] ) {
-        $arrayLoader = new ArrayLoader([
-            'template.html' => $template
-        ]);
 
+        /**
+         * The passed in template is a raw string of content, because it's
+         * been parsed for Front Matter before it gets here.
+         *
+         * We use ArrayLoader for that, then FilesystemLoader for any other
+         * templates that it might reference, like layouts or includes.
+         */
+        $arrayLoader = new ArrayLoader([ 'template.html' => $template ]);
         $fileLoader = new FilesystemLoader($this->instance->config->inputDir);
-
-        $twig = new Environment(new ChainLoader([$arrayLoader, $fileLoader]), [ 'cache' => false ]);
+        $loader = new ChainLoader([$arrayLoader, $fileLoader]);
+        $twig = new Environment($loader, [ 'cache' => false ]);
 
         return $twig->render('template.html', $context);
     }

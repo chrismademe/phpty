@@ -9,4 +9,8 @@ class Console {
         echo $emoji . ' ' . $text . PHP_EOL;
     }
 
+    public static function warn( string $text, string $emoji = null ) {
+        self::info($text, $emoji ?? '⚠️');
+    }
+
 }

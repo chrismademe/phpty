@@ -1,0 +1,6 @@
+[build]
+
+PHP_VERSION=7.3
+
+command = "php ty"
+publish = "output"

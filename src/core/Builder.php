@@ -2,8 +2,10 @@
 
 namespace PHPty;
 
+use PHPty\Render\PHP;
 use PHPty\Render\Twig;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Builder {
 
@@ -13,12 +15,21 @@ class Builder {
     }
 
     public function build() {
+        $startedAt = microtime(true);
+
         $this->clearOutputDir();
         $this->createOutputDir();
         $input = $this->locateInputFiles();
         $output = $this->renderTemplates($input);
+        $this->writeOutputToFilesystem($output);
+        $this->copyPassthroughFiles();
 
-        // print_r($output);
+        $finishedAt = microtime(true);
+
+        Console::info( sprintf(
+            'Built site in %s seconds',
+            $finishedAt - $startedAt
+        ), '🤖' );
     }
 
     /**
@@ -89,18 +100,61 @@ class Builder {
                     case str_ends_with( $file['fileName'], '.twig' ):
                         $twig = new Twig($this->instance);
                         $input[$key]['rendered'] = $twig->render($input[$key]['templateData']->body(), $input[$key]['data']);
-                        $finishedAt = microtime(true);
-                        Console::info( sprintf(
-                            'Rendered %s -> %s in %s seconds',
-                            $file['pathName'],
-                            $input[$key]['data']['page']['permalink'],
-                            $finishedAt - $startedAt
-                        ), '🤖' );
+                        break;
+
+                    case str_ends_with( $file['fileName'], '.php' ):
+                        $php = new PHP($this->instance);
+                        $input[$key]['rendered'] = $php->render($file['pathName'], $input[$key]['data']);
+                        break;
 
                 }
+
+                // Log Render time
+                $finishedAt = microtime(true);
+                Console::info( sprintf(
+                    'Rendered %s -> %s in %s seconds',
+                    $file['pathName'],
+                    $input[$key]['data']['page']['permalink'],
+                    $finishedAt - $startedAt
+                ), '🤖' );
             }
 
             return $input;
+        }
+    }
+
+    /**
+     * Write Output to Filesystem
+     *
+     * @param array $output Output from build method
+     */
+    protected function writeOutputToFilesystem( array $output ) {
+        foreach ( $output as $key => $file ) {
+            $path = sprintf( '%s/%s', $this->instance->config->outputDir, $file['data']['page']['permalink'] );
+            write_file( $path, $file['rendered'] );
+        }
+    }
+
+    /**
+     * Copy Passthrough Files
+     */
+    protected function copyPassthroughFiles() {
+        $files = $this->instance->config->passthrough ?? [];
+        if ( empty($files) ) return;
+
+        $filesystem = new Filesystem;
+
+        foreach ( $files as $file ) {
+            $isDirectory = is_dir($file);
+            $filename = ltrim( $file, $this->instance->config->inputDir );
+            Console::info(sprintf('Copying %s', $file), '📂');
+
+            // Directory
+            if ( $isDirectory ) {
+                $filesystem->mirror( $file, sprintf('%s%s', $this->instance->config->outputDir, $filename) );
+            } else {
+                $filesystem->copy( $file, sprintf('%s/%s', $this->instance->config->outputDir, $filename) );
+            }
         }
     }
 
@@ -126,8 +180,15 @@ class Builder {
             array_pop($permalinkParts);
             $permalinkBare = join('.', $permalinkParts);
 
+            // Index
             if ( $permalinkBare === 'index' ) {
                 $data['page']['permalink'] = 'index.html';
+
+            // Filename path (e.g. something.json.php -> something.json)
+            } elseif ( str_is_filename($permalinkBare) ) {
+                $data['page']['permalink'] = $permalinkBare;
+
+            // Directory path (e.g. something.html -> something/index.html)
             } else {
                 $data['page']['permalink'] = sprintf( '%s/index.html', join('.', $permalinkParts) );
             }
@@ -142,6 +203,7 @@ class Builder {
      * Clear out a target directory
      *
      * @param string $target Directory path
+     * @see https://paulund.co.uk/php-delete-directory-and-files-in-directory
      */
     protected function deleteFiles( string $target ) {
         if ( is_dir($target) ) {
