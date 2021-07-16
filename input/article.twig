@@ -3,8 +3,8 @@ collection:
     data: posts
     perPage: 1
     alias: post
-    permalink: "/{{ post.slug }}/index.html"
+    permalink: "/{{ post.id }}/index.html"
 ---
 
 <h1>{{ post.title }}</h1>
-{{ post.content }}
+{{ post.body }}
