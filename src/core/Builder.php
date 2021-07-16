@@ -15,11 +15,14 @@ class Builder {
     }
 
     public function build() {
+        Console::info( 'Starting build...', '🤖' );
         $startedAt = microtime(true);
 
         $this->clearOutputDir();
         $this->createOutputDir();
         $input = $this->locateInputFiles();
+        $input = $this->populateData($input);
+        $input = $this->generateCollections($input);
         $output = $this->renderTemplates($input);
         $this->writeOutputToFilesystem($output);
         $this->copyPassthroughFiles();
@@ -36,7 +39,6 @@ class Builder {
      * Create Output Directory
      */
     public function createOutputDir() {
-        Console::info('Creating output directory...');
         mkdir($this->config->outputDir);
     }
 
@@ -44,7 +46,6 @@ class Builder {
      * Clear Output Directory
      */
     public function clearOutputDir() {
-        Console::info('Clearing output directory...');
         $this->deleteFiles($this->config->outputDir);
     }
 
@@ -53,7 +54,6 @@ class Builder {
      * Scans input directory for recognised files
      */
     public function locateInputFiles() {
-        Console::info('Searching for input files...');
 
         $locator = new LocateFiles([
             'dir' => $this->config->inputDir,
@@ -74,37 +74,28 @@ class Builder {
             foreach ( $input as $key => $file ) {
                 $startedAt = microtime(true);
 
-                // Skip layouts and includes
+                // Skip layouts, includes and data
                 if (
                     str_contains( $file['pathName'], '_layouts' ) ||
-                    str_contains( $file['pathName'], '_includes' )
+                    str_contains( $file['pathName'], '_includes' ) ||
+                    str_contains( $file['pathName'], '_data' )
                 ) {
                     unset($input[$key]);
                     continue;
                 }
-
-                // Load template contents
-                $contents = @file_get_contents($this->config->inputDir . '/' . $file['pathName']);
-
-                // Parse Front Matter
-                $input[$key]['templateData'] = $this->parseFrontMatter($contents);
-
-                // Populate data
-                $input[$key]['data'] = $this->populateData([
-                    'page' => array_merge( $input[$key]['templateData']->matter(), $file )
-                ] );
 
                 switch ( $file['fileName'] ) {
 
                     // Twig
                     case str_ends_with( $file['fileName'], '.twig' ):
                         $twig = new Twig($this->instance);
-                        $input[$key]['rendered'] = $twig->render($input[$key]['templateData']->body(), $input[$key]['data']);
+                        $input[$key]['rendered'] = $twig->render($file['pathName'], $input[$key]['templateData']->body(), $input[$key]['data']);
                         break;
 
+                    // PHP
                     case str_ends_with( $file['fileName'], '.php' ):
                         $php = new PHP($this->instance);
-                        $input[$key]['rendered'] = $php->render($file['pathName'], $input[$key]['data']);
+                        $input[$key]['rendered'] = $php->render($file['pathName'], $input[$key]['templateData']->body(), $input[$key]['data']);
                         break;
 
                 }
@@ -169,10 +160,29 @@ class Builder {
         return YamlFrontMatter::parse($contents);
     }
 
+    public function populateData( array $input ) {
+        foreach ( $input as $key => $file ) {
+            // Load template contents
+            $contents = @file_get_contents($this->config->inputDir . '/' . $file['pathName']);
+
+            // Parse Front Matter
+            $input[$key]['templateData'] = $this->parseFrontMatter($contents);
+
+            // Populate data
+            $input[$key]['data'] = $this->populateDefaultData([
+                'page' => array_merge( $input[$key]['templateData']->matter(), $file )
+            ] );
+
+            $input[$key]['isCollection'] = array_key_exists( 'collection', $input[$key]['data']['page'] );
+        }
+
+        return $input;
+    }
+
     /**
      * Populate Data
      */
-    public function populateData( array $data ) {
+    public function populateDefaultData( array $data ) {
 
         // Generate permalink
         if ( ! array_key_exists( 'permalink', $data['page'] ) ) {
@@ -194,8 +204,48 @@ class Builder {
             }
         }
 
+        // Add in global data
+        $data = array_merge( $this->instance->data->get(), $data );
+
         return $data;
 
+    }
+
+    /**
+     * Generate Collections
+     *
+     * @param array $input
+     */
+    public function generateCollections( array $input ) {
+
+        foreach ( $input as $key => $file ) {
+            if ( $file['isCollection'] === false ) continue;
+
+            // Remove the collection from the original input array
+            unset($input[$key]);
+
+            // Setup Collection
+            $collection = $file['data']['page']['collection'];
+
+            // Validate collection data exists
+            if ( ! array_key_exists( $collection['data'], $file['data'] ) ) {
+                Console::warn( sprintf( 'Couldn\'t locate collection data with key "%s", skipping...', $collection['data'] ) );
+                continue;
+            }
+
+            // Populate collection as templates
+            foreach ( $file['data'][$collection['data']] as $__key => $__value ) {
+                $file['data'][$collection['alias']] = $__value;
+
+                // Parse permalink with Twig
+                $twig = new Twig($this->instance);
+                $file['data']['page']['permalink'] = $twig->render('', $file['data']['page']['collection']['permalink'], $file['data']);
+
+                $input[] = $file;
+            }
+        }
+
+        return $input;
     }
 
     /**

@@ -19,10 +19,11 @@ class Twig implements RenderInterface {
     /**
      * Render
      *
-     * @param string $template Template Content
+     * @param string $file Template file path
+     * @param string $content Template contents, after being parsed for Front Matter
      * @param array $context Context array
      */
-    public function render( string $template, array $context = [] ) {
+    public function render( string $file, string $content, array $context = [] ) {
 
         /**
          * The passed in template is a raw string of content, because it's
@@ -31,7 +32,7 @@ class Twig implements RenderInterface {
          * We use ArrayLoader for that, then FilesystemLoader for any other
          * templates that it might reference, like layouts or includes.
          */
-        $arrayLoader = new ArrayLoader([ 'template.html' => $template ]);
+        $arrayLoader = new ArrayLoader([ 'template.html' => $content ]);
         $fileLoader = new FilesystemLoader($this->instance->config->inputDir);
         $loader = new ChainLoader([$arrayLoader, $fileLoader]);
         $twig = new Environment($loader, [ 'cache' => false ]);
