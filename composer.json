@@ -11,7 +11,8 @@
 	"require": {
 		"twig/twig": "^3.3",
 		"spatie/yaml-front-matter": "^2.0",
-		"symfony/filesystem": "^5.3"
+		"symfony/filesystem": "^5.3",
+		"erusev/parsedown-extra": "^0.8.1"
 	},
 	"autoload": {
 		"psr-4": {
