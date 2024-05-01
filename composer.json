@@ -9,9 +9,9 @@
 		}
 	],
 	"require": {
-		"twig/twig": "^3.6",
-		"spatie/yaml-front-matter": "^2.0",
-		"symfony/filesystem": "^5.3",
+		"twig/twig": "^3.9.3",
+		"spatie/yaml-front-matter": "^2.0.8",
+		"symfony/filesystem": "^5.4.39",
 		"erusev/parsedown-extra": "^0.8.1"
 	},
 	"autoload": {
