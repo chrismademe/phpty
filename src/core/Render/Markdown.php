@@ -52,10 +52,7 @@ class Markdown implements RenderInterface {
      * Make Twig Content
      */
     private function makeTwigContent( string $layout, string $content ) {
-        $string = '{% extends "_layouts/' . $layout . '.twig" %}' . PHP_EOL;
-        $string .= '{% block content %}' . $content . '{% endblock %}';
-
-        return $string;
+        return sprintf( '<%1$s :page="page">%2$s</%1$s>', $layout, $content );
     }
 
 }
