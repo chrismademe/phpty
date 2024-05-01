@@ -10,6 +10,9 @@ class Staple {
     public $events;
     public $data;
 
+    /**
+     * Constructor
+     */
     public function __construct() {
         $this->config = $this->loadConfig();
         $this->filters = new Filters;
@@ -19,6 +22,9 @@ class Staple {
         $this->loadDataFiles();
     }
 
+    /**
+     * Load the configuration file.
+     */
     private function loadConfig() {
         $config = new Config();
         $userConfigFile = __DIR__ . '/../../staple.config.php';
@@ -31,6 +37,9 @@ class Staple {
         return $config;
     }
 
+    /**
+     * Load data files from the _data directory.
+     */
     private function loadDataFiles() {
         $location = $this->config->inputDir . '/_data/';
         $dataFiles = glob( $location . '*.php' );
@@ -43,6 +52,9 @@ class Staple {
         }
     }
 
+    /**
+     * Run any plugins that have been registered.
+     */
     private function runPlugins() {
         if ( $this->hasPlugins() ) {
             foreach ( $this->plugins as $plugin ) {
@@ -51,10 +63,18 @@ class Staple {
         }
     }
 
+    /**
+     * Add a plugin to the Staple instance.
+     *
+     * @param callable $plugin
+     */
     public function addPlugin( callable $plugin ) {
         $this->plugins[] = $plugin;
     }
 
+    /**
+     * Check if there are any plugins registered.
+     */
     public function hasPlugins() {
         return is_array($this->plugins) && !empty($this->plugins);
     }

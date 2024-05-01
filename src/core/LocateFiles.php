@@ -9,10 +9,20 @@ class LocateFiles {
 
     private $options;
 
+    /**
+     * Constructor
+     *
+     * @param array $options
+     */
     public function __construct( array $options ) {
         $this->options = $options;
     }
 
+    /**
+     * Locate files
+     *
+     * @return array
+     */
     public function locate() {
         $iterator = new RecursiveDirectoryIterator($this->options['dir']);
         $foundFiles = new RecursiveIteratorIterator($iterator);

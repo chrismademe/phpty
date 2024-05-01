@@ -4,8 +4,9 @@
  * Staple Config
  *
  * This is where you can define configuration for your Staple
- * site. This file should return a function that accepts 1
- * parameter, which will be the $config object
+ * site. This file should return a function that accepts 2
+ * parameters, which will be the $config instance and
+ * the $staple instance.
  *
  * @param Staple\Config $config
  * @param Staple\Staple $staple

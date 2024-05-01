@@ -10,7 +10,7 @@ class Console {
     }
 
     public static function warn( string $text, string $emoji = null ) {
-        self::info($text, $emoji ?? '⚠️');
+        self::info($text, $emoji ?? '❗️');
     }
 
 }
