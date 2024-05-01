@@ -35,6 +35,7 @@ class LocateFiles {
 
             if ( $fileTypes && in_array( $fileSlug, $fileTypes) ) {
                 $files[] = [
+                    'inputFilePath' => $file->getPathName(),
                     'pathName' => str_replace($this->options['dir'] . '/', '', $file->getPathName()),
                     'fileName' => $file->getFileName()
                 ];

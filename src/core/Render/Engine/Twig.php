@@ -97,8 +97,14 @@ class Twig {
 	 * @return void
 	 */
 	private function register_functions() {
+		$this->staple->events->dispatch( 'twig.registerFunctions', $this->instance );
+
 		$this->instance->addFunction(
 			new TwigFunction( 'render_component', [$this, 'render_component'], [ 'is_safe' => [ 'html' ] ] )
+		);
+
+		$this->instance->addFunction(
+			new TwigFunction( 'dump', 'print_r', [ 'is_safe' => [ 'html' ] ] )
 		);
 	}
 

@@ -174,6 +174,11 @@ class Builder {
                 }
 
                 /**
+                 * Add page to the `pages` Collection
+                 */
+                $this->collections->addPage('pages', $input[$key]['data']['page']);
+
+                /**
                  * Event: After Render Template
                  */
                 $this->instance->events->dispatch('after.renderTemplate', $this->instance, $file, $input[$key]);
@@ -271,6 +276,7 @@ class Builder {
         // Generate permalink
         if ( ! array_key_exists( 'permalink', $data['page'] ) ) {
             $data['page']['permalink'] = generate_permalink($data['page']['pathName']);
+            $data['page']['url'] = str_replace( 'index.html', '', $data['page']['permalink'] );
         }
 
         // Add in global data
