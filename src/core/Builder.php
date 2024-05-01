@@ -24,14 +24,30 @@ class Builder {
         Console::info( 'Starting build...', '🤖' );
         $timer = new Timer;
 
+        /**
+         * Event: Before Build
+         */
+        $this->instance->events->dispatch('before.build', $this->instance);
+
         $this->clearOutputDir();
         $this->createOutputDir();
         $input = $this->locateInputFiles();
         $input = $this->populateData($input);
         $input = $this->generateCollections($input);
         $output = $this->renderTemplates($input);
+
+        /**
+         * Filter: After Compile
+         */
+        $output = $this->instance->filters->apply('after.compile', $output, $input, $this->instance);
+
         $this->writeOutputToFilesystem($output);
         $this->copyPassthroughFiles();
+
+        /**
+         * Event: After Build
+         */
+        $this->instance->events->dispatch('after.build', $this->instance, $output);
 
         Console::info( sprintf(
             'Built site in %s seconds',
@@ -43,14 +59,34 @@ class Builder {
      * Create Output Directory
      */
     public function createOutputDir() {
+        /**
+         * Event: Before Create Output Directory
+         */
+        $this->instance->events->dispatch('before.createOutputDir', $this->instance);
+
         mkdir($this->config->outputDir);
+
+        /**
+         * Event: After Create Output Directory
+         */
+        $this->instance->events->dispatch('after.createOutputDir', $this->instance);
     }
 
     /**
      * Clear Output Directory
      */
     public function clearOutputDir() {
+        /**
+         * Event: Before Clear Output Directory
+         */
+        $this->instance->events->dispatch('before.clearOutputDir', $this->instance);
+
         $this->deleteFiles($this->config->outputDir);
+
+        /**
+         * Event: After Clear Output Directory
+         */
+        $this->instance->events->dispatch('after.createOutputDir', $this->instance);
     }
 
     /**
@@ -58,6 +94,11 @@ class Builder {
      * Scans input directory for recognised files
      */
     public function locateInputFiles() {
+
+        /**
+         * Event: Before Locate Input Files
+         */
+        $this->instance->events->dispatch('before.locateInputFiles', $this->instance);
 
         $locator = new LocateFiles([
             'dir' => $this->config->inputDir,
@@ -70,7 +111,14 @@ class Builder {
             ] )
         ]);
 
-        return $locator->locate();
+        $files = $locator->locate();
+
+        /**
+         * Event: After Locate Input Files
+         */
+        $this->instance->events->dispatch('after.locateInputFiles', $this->instance, $files);
+
+        return $files;
     }
 
     /**
@@ -81,8 +129,19 @@ class Builder {
      */
     public function renderTemplates( array $input ) {
         if ( ! empty($input) ) {
+
+            /**
+             * Event: Before Render Templates
+             */
+            $this->instance->events->dispatch('before.renderTemplates', $this->instance, $input);
+
             foreach ( $input as $key => $file ) {
                 $timer = new Timer;
+
+                /**
+                 * Event: Before Render Template
+                 */
+                $this->instance->events->dispatch('before.renderTemplate', $this->instance, $file, $input[$key]);
 
                 // Skip layouts, includes and data
                 if (str_starts_with( $file['pathName'], '_' )) {
@@ -114,6 +173,11 @@ class Builder {
 
                 }
 
+                /**
+                 * Event: After Render Template
+                 */
+                $this->instance->events->dispatch('after.renderTemplate', $this->instance, $file, $input[$key]);
+
                 Console::info( sprintf(
                     'Rendered %s -> %s in %s',
                     $file['pathName'],
@@ -121,6 +185,11 @@ class Builder {
                     $timer->result()
                 ), '🤖' );
             }
+
+            /**
+             * Event: After Render Templates
+             */
+            $this->instance->events->dispatch('after.renderTemplates', $this->instance, $input);
 
             return $input;
         }

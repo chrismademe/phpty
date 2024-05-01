@@ -4,6 +4,7 @@ namespace Staple;
 
 class Staple {
 
+    public $plugins;
     public $config;
     public $filters;
     public $events;
@@ -14,6 +15,7 @@ class Staple {
         $this->filters = new Filters;
         $this->events = new Events;
         $this->data = new Data;
+        $this->runPlugins();
         $this->loadDataFiles();
     }
 
@@ -23,7 +25,7 @@ class Staple {
 
         if ( is_readable($userConfigFile) ) {
             $userConfigFunction = require_once $userConfigFile;
-            $userConfig = call_user_func_array($userConfigFunction, [$config, $this->data]);
+            $userConfig = call_user_func_array($userConfigFunction, [$config, $this]);
         }
 
         return $config;
@@ -39,6 +41,22 @@ class Staple {
                 $this->data->set($key, include $file);
             }
         }
+    }
+
+    private function runPlugins() {
+        if ( $this->hasPlugins() ) {
+            foreach ( $this->plugins as $plugin ) {
+                call_user_func($plugin, $this);
+            }
+        }
+    }
+
+    public function addPlugin( callable $plugin ) {
+        $this->plugins[] = $plugin;
+    }
+
+    public function hasPlugins() {
+        return is_array($this->plugins) && !empty($this->plugins);
     }
 
 }

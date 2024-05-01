@@ -10,10 +10,6 @@ class Config {
         $this->config = array_merge( $this->config, $this->getDefaultConfig() );
     }
 
-    public function addPlugin( callable $plugin ) {
-        $this->config['plugins'][] = $plugin;
-    }
-
     public function addPassthroughCopy( string $path ) {
 
         // Make sure the file exists
@@ -36,8 +32,7 @@ class Config {
     protected function getDefaultConfig() {
         return [
             'inputDir' => 'input',
-            'outputDir' => 'output',
-            'plugins' => []
+            'outputDir' => 'output'
         ];
     }
 
