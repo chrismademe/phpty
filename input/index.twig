@@ -7,8 +7,6 @@ tags:
     - css
 ---
 
-{% extends "_layouts/default.twig" %}
-
-{% block content %}
+<Layout :page="page">
     <Welcome :tags="page.tags" />
-{% endblock %}
+</Layout>

@@ -1,6 +1,6 @@
 [build]
 
-PHP_VERSION=7.4
+PHP_VERSION=8.3
 
 command = "php staple"
 publish = "output"

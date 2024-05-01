@@ -5,9 +5,7 @@ collection:
     permalink: "{{ post.id }}/index.html"
 title: "{{ post.title }}"
 ---
-{% extends "_layouts/default.twig" %}
-
-{% block content %}
+<Layout :page="page">
     <h1>{{ post.title }}</h1>
     {{ post.body }}
-{% endblock %}
+</Layout>

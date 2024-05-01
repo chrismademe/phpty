@@ -1,6 +1,5 @@
 ---
 title: About Page
-layout: default
 ---
 
 # Wow such page
