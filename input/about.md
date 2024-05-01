@@ -5,4 +5,4 @@ layout: default
 
 # Wow such page
 
-This page uses Markdown
+This page uses Markdown, wow.

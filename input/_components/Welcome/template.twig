@@ -1,0 +1,16 @@
+<h1>Staple</h1>
+
+<p>A PHP static site generator inspired by 11ty.</p>
+<p>
+    This project is an experiment, to see how I get on building a static site generator with PHP. If you're seeing this,
+    it worked to some degree!
+</p>
+<p>It can even do arbitrary file types, like <a href="/posts.json">JSON</a>.</p>
+
+<h2>Tags</h2>
+<p>An example of page level data</p>
+<ul>
+    {% for tag in tags %}
+        <li>{{ tag }}</li>
+    {% endfor %}
+</ul>

@@ -15,13 +15,13 @@ class Timer {
         $this->startedAt = microtime(true);
     }
 
-    public function end() {
+    public function result() {
         $this->endedAt = microtime(true);
         return $this->getResult();
     }
 
     private function getResult() {
-        return sprintf('%s seconds', $this->endedAt - $this->startedAt);
+        return sprintf('%s seconds', number_format($this->endedAt - $this->startedAt, 3));
     }
 
 }

@@ -1,0 +1,13 @@
+---
+collection:
+    data: posts
+    alias: post
+    permalink: "{{ post.id }}/index.html"
+title: "{{ post.title }}"
+---
+{% extends "_layouts/default.twig" %}
+
+{% block content %}
+    <h1>{{ post.title }}</h1>
+    {{ post.body }}
+{% endblock %}

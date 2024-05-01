@@ -49,7 +49,34 @@ function fetch( string $url, string $contentType = 'json' ) {
         $result = json_decode($result, true);
     }
 
-    Console::info( sprintf('Completed fetch to "%s" in %s', $url, $timer->end()), '🌍' );
+    Console::info( sprintf('Completed fetch to "%s" in %s', $url, $timer->result()), '🌍' );
 
     return $result;
+}
+
+/**
+ * Generate Permalink
+ *
+ * Creates a URL friendly permalink from a file name
+ *
+ * @param string $filename
+ * @return string
+ */
+function generate_permalink( string $filename ) {
+    $permalinkParts = explode('.', $filename);
+    array_pop($permalinkParts);
+    $permalinkBare = join('.', $permalinkParts);
+
+    // Index
+    if ( $permalinkBare === 'index' ) {
+        return 'index.html';
+
+    // Filename path (e.g. something.json.php -> something.json)
+    } elseif ( str_is_filename($permalinkBare) ) {
+        return $permalinkBare;
+
+    // Directory path (e.g. something.html -> something/index.html)
+    } else {
+        return sprintf( '%s/index.html', join('.', $permalinkParts) );
+    }
 }

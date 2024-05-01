@@ -7,6 +7,8 @@ use Staple\Staple;
 
 class Markdown implements RenderInterface {
 
+    private $instance;
+
     public function __construct(Staple $instance) {
         $this->instance = $instance;
     }

@@ -2,6 +2,7 @@
 
 namespace Staple;
 
+use Staple\Render\Markdown;
 use Staple\Render\PHP;
 use Staple\Render\Twig;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
@@ -9,14 +10,19 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class Builder {
 
+    private $instance;
+    private $config;
+    private $collections;
+
     public function __construct(Staple $instance) {
         $this->instance = $instance;
         $this->config = $instance->config;
+        $this->collections = new Collections;
     }
 
     public function build() {
         Console::info( 'Starting build...', '🤖' );
-        $startedAt = microtime(true);
+        $timer = new Timer;
 
         $this->clearOutputDir();
         $this->createOutputDir();
@@ -27,11 +33,9 @@ class Builder {
         $this->writeOutputToFilesystem($output);
         $this->copyPassthroughFiles();
 
-        $finishedAt = microtime(true);
-
         Console::info( sprintf(
             'Built site in %s seconds',
-            $finishedAt - $startedAt
+            $timer->result()
         ), '🤖' );
     }
 
@@ -57,7 +61,13 @@ class Builder {
 
         $locator = new LocateFiles([
             'dir' => $this->config->inputDir,
-            'fileTypes' => $this->instance->filters->apply( 'input.fileTypes', [ 'twig', 'php' ] )
+            'fileTypes' => $this->instance->filters->apply( 'input.fileTypes', [
+                'html',
+                'twig',
+                'php',
+                'md',
+                'markdown'
+            ] )
         ]);
 
         return $locator->locate();
@@ -72,14 +82,10 @@ class Builder {
     public function renderTemplates( array $input ) {
         if ( ! empty($input) ) {
             foreach ( $input as $key => $file ) {
-                $startedAt = microtime(true);
+                $timer = new Timer;
 
                 // Skip layouts, includes and data
-                if (
-                    str_contains( $file['pathName'], '_layouts' ) ||
-                    str_contains( $file['pathName'], '_includes' ) ||
-                    str_contains( $file['pathName'], '_data' )
-                ) {
+                if (str_starts_with( $file['pathName'], '_' )) {
                     unset($input[$key]);
                     continue;
                 }
@@ -87,6 +93,7 @@ class Builder {
                 switch ( $file['fileName'] ) {
 
                     // Twig
+                    case str_ends_with( $file['fileName'], '.html' ):
                     case str_ends_with( $file['fileName'], '.twig' ):
                         $twig = new Twig($this->instance);
                         $input[$key]['rendered'] = $twig->render($file['pathName'], $input[$key]['templateData']->body(), $input[$key]['data']);
@@ -98,15 +105,20 @@ class Builder {
                         $input[$key]['rendered'] = $php->render($file['pathName'], $input[$key]['templateData']->body(), $input[$key]['data']);
                         break;
 
+                    // Markdown
+                    case str_ends_with( $file['fileName'], '.md' ):
+                    case str_ends_with( $file['fileName'], '.markdown' ):
+                        $php = new Markdown($this->instance);
+                        $input[$key]['rendered'] = $php->render($file['pathName'], $input[$key]['templateData']->body(), $input[$key]['data']);
+                        break;
+
                 }
 
-                // Log Render time
-                $finishedAt = microtime(true);
                 Console::info( sprintf(
-                    'Rendered %s -> %s in %s seconds',
+                    'Rendered %s -> %s in %s',
                     $file['pathName'],
                     $input[$key]['data']['page']['permalink'],
-                    $finishedAt - $startedAt
+                    $timer->result()
                 ), '🤖' );
             }
 
@@ -143,6 +155,8 @@ class Builder {
             // Directory
             if ( $isDirectory ) {
                 $filesystem->mirror( $file, sprintf('%s%s', $this->instance->config->outputDir, $filename) );
+
+            // File
             } else {
                 $filesystem->copy( $file, sprintf('%s/%s', $this->instance->config->outputDir, $filename) );
             }
@@ -170,6 +184,7 @@ class Builder {
 
             // Populate data
             $input[$key]['data'] = $this->populateDefaultData([
+                'collections' => $this->collections,
                 'page' => array_merge( $input[$key]['templateData']->matter(), $file )
             ] );
 
@@ -186,25 +201,11 @@ class Builder {
 
         // Generate permalink
         if ( ! array_key_exists( 'permalink', $data['page'] ) ) {
-            $permalinkParts = explode('.', $data['page']['pathName']);
-            array_pop($permalinkParts);
-            $permalinkBare = join('.', $permalinkParts);
-
-            // Index
-            if ( $permalinkBare === 'index' ) {
-                $data['page']['permalink'] = 'index.html';
-
-            // Filename path (e.g. something.json.php -> something.json)
-            } elseif ( str_is_filename($permalinkBare) ) {
-                $data['page']['permalink'] = $permalinkBare;
-
-            // Directory path (e.g. something.html -> something/index.html)
-            } else {
-                $data['page']['permalink'] = sprintf( '%s/index.html', join('.', $permalinkParts) );
-            }
+            $data['page']['permalink'] = generate_permalink($data['page']['pathName']);
         }
 
         // Add in global data
+        // @note Page level data overrides Global data
         $data = array_merge( $this->instance->data->get(), $data );
 
         return $data;
@@ -219,7 +220,9 @@ class Builder {
     public function generateCollections( array $input ) {
 
         foreach ( $input as $key => $file ) {
-            if ( $file['isCollection'] === false ) continue;
+            if ( $file['isCollection'] === false ) {
+                continue;
+            }
 
             // Remove the collection from the original input array
             unset($input[$key]);
@@ -241,6 +244,15 @@ class Builder {
                 $twig = new Twig($this->instance);
                 $file['data']['page']['permalink'] = $twig->render('', $file['data']['page']['collection']['permalink'], $file['data']);
 
+                // Parse Title
+                if ( array_key_exists('title', $file['data']['page']) ) {
+                    $file['data']['page']['title'] = $twig->render('', $file['data']['page']['title'], $file['data']);
+                }
+
+                $this->collections->addPage($collection['data'], [
+                    'title' => $file['data']['page']['title'] ?? '',
+                    'permalink' => $file['data']['page']['permalink']
+                ]); // Add to collections store
                 $input[] = $file;
             }
         }

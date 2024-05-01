@@ -3,13 +3,16 @@
 namespace Staple\Render;
 
 use Staple\Staple;
+use Staple\Render\Engine\Twig as TwigEngine;
 use Twig\Loader\ArrayLoader;
 use Twig\Loader\ChainLoader;
 use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
 use Twig\Environment;
 
 class Twig implements RenderInterface {
 
+    private $instance;
     private $twig;
 
     public function __construct(Staple $instance) {
@@ -32,12 +35,15 @@ class Twig implements RenderInterface {
          * We use ArrayLoader for that, then FilesystemLoader for any other
          * templates that it might reference, like layouts or includes.
          */
-        $arrayLoader = new ArrayLoader([ 'template.html' => $content ]);
-        $fileLoader = new FilesystemLoader($this->instance->config->inputDir);
-        $loader = new ChainLoader([$arrayLoader, $fileLoader]);
-        $twig = new Environment($loader, [ 'cache' => false ]);
+        // $arrayLoader = new ArrayLoader([ 'template.html' => $content ]);
+        // $fileLoader = new FilesystemLoader($this->instance->config->inputDir);
+        // $loader = new ChainLoader([$arrayLoader, $fileLoader]);
+        // $twig = new Environment($loader, [ 'cache' => false ]);
 
-        return $twig->render('template.html', $context);
+        // $twig->addFunction(new TwigFunction('dump', 'print_r'));
+        $twig = new TwigEngine($this->instance, $this->instance->config->inputDir);
+
+        return $twig->render($content, $context, 'string');
     }
 
 }

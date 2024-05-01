@@ -7,6 +7,8 @@ use RecursiveIteratorIterator;
 
 class LocateFiles {
 
+    private $options;
+
     public function __construct( array $options ) {
         $this->options = $options;
     }
