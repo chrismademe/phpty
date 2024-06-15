@@ -1,6 +1,7 @@
 {
 	"name": "chrismademe/staple",
 	"description": "A PHP static site generator, inspired by 11ty.",
+	"version": "0.1.0",
 	"type": "library",
 	"license": "MIT",
 	"authors": [
@@ -14,7 +15,8 @@
 		"twig/twig": "^3.9.3",
 		"spatie/yaml-front-matter": "^2.0.8",
 		"symfony/filesystem": "^5.4.39",
-		"erusev/parsedown-extra": "^0.8.1"
+		"erusev/parsedown-extra": "^0.8.1",
+		"chrismademe/twilight": "^0.6.1"
 	},
 	"autoload": {
 		"psr-4": {

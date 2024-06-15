@@ -4,8 +4,45 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b87add93f16377de16c97f7d88e88393",
+    "content-hash": "6cf46bdb1435732c08250aeaf850d011",
     "packages": [
+        {
+            "name": "chrismademe/twilight",
+            "version": "0.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/chrismademe/twilight.git",
+                "reference": "8d6027cadf4e4c536a69e7076b3f34d7c00e312f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/chrismademe/twilight/zipball/8d6027cadf4e4c536a69e7076b3f34d7c00e312f",
+                "reference": "8d6027cadf4e4c536a69e7076b3f34d7c00e312f",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twilight\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Galbraith",
+                    "email": "chris@resknow.co.uk"
+                }
+            ],
+            "description": "Experimental Twig compiler with support for custom Components",
+            "support": {
+                "issues": "https://github.com/chrismademe/twilight/issues",
+                "source": "https://github.com/chrismademe/twilight/tree/0.6.1"
+            },
+            "time": "2024-05-30T20:09:00+00:00"
+        },
         {
             "name": "erusev/parsedown",
             "version": "1.7.4",
@@ -758,7 +795,9 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": "^8.2"
+    },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

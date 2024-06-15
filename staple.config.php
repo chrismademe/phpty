@@ -11,7 +11,7 @@
  * @param Staple\Config $config
  * @param Staple\Staple $staple
  */
-return function($config, $staple) {
+return function( Staple\Config $config, Staple\Staple $staple ) {
     /**
      * Register a plugin with Staple
      *
@@ -28,7 +28,7 @@ return function($config, $staple) {
                 if ( isset( $file['rendered'] ) ) {
                     $output[$key]['rendered'] = str_replace(
                         '<html>',
-                        sprintf('<html lang="%s">', $staple->config->lang),
+                        sprintf('<!doctype html><html lang="%s">', $staple->config->lang),
                         $file['rendered']
                     );
                 }

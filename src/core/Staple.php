@@ -27,7 +27,7 @@ class Staple {
      */
     private function loadConfig() {
         $config = new Config();
-        $userConfigFile = __DIR__ . '/../../staple.config.php';
+        $userConfigFile = getcwd() . '/staple.config.php';
 
         if ( is_readable($userConfigFile) ) {
             $userConfigFunction = require_once $userConfigFile;

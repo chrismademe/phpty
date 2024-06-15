@@ -3,6 +3,15 @@
 namespace Staple\Render\Engine;
 
 use Staple\Staple;
+use Twilight\Compiler;
+use Twilight\Directives;
+use Twilight\Tokenizer;
+use Twilight\NodeTree;
+use Twilight\Directives\AttributesDirective;
+use Twilight\Directives\IfDirective;
+use Twilight\Directives\ForDirective;
+use Twilight\Directives\HtmlDirective;
+use Twilight\Directives\TextDirective;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\TwigFunction;
@@ -12,6 +21,7 @@ class Twig {
 	private $options = [];
 	private $instance;
 	private $loader;
+	private $template;
 
 	/**
 	 * Constructor
@@ -43,6 +53,8 @@ class Twig {
 	 * @return string Rendered template.
 	 */
 	public function render( string $template, array $context = [], string $type = 'file' ) {
+
+		$this->template = $template;
 
 		// Load the template
 		if ($type === 'file') {
@@ -87,8 +99,21 @@ class Twig {
 	 * @return string Rendered component HTML
 	 */
 	public function parse_components( string $string ) {
-		$parser = new Parser;
-		return $parser->parse( $string );
+		$directives = new Directives;
+		$directives->register('attributes', AttributesDirective::class);
+		$directives->register('if', IfDirective::class);
+		$directives->register('for', ForDirective::class);
+		$directives->register('html', HtmlDirective::class);
+		$directives->register('text', TextDirective::class);
+
+		$tokenizer = new Tokenizer($string, ['ignore' => ['InnerBlocks']]);
+		$tree = new NodeTree($tokenizer->tokenize(), $directives);
+		$elements = $tree->create();
+
+		$compiler = new Compiler();
+		$template = $compiler->compile($elements);
+
+		return $template;
 	}
 
 	/**

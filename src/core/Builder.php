@@ -343,17 +343,7 @@ class Builder {
      * @see https://paulund.co.uk/php-delete-directory-and-files-in-directory
      */
     protected function deleteFiles( string $target ) {
-        if ( is_dir($target) ) {
-            $files = glob( $target . '/*', GLOB_MARK ); //GLOB_MARK adds a slash to directories returned
-
-            foreach( $files as $file ) {
-                $this->deleteFiles( $file );
-            }
-
-            rmdir( $target );
-        } elseif ( is_file($target) ) {
-            unlink( $target );
-        }
+        remove_dir($target);
     }
 
 }

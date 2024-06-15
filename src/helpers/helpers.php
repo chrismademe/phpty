@@ -80,3 +80,26 @@ function generate_permalink( string $filename ) {
         return sprintf( '%s/index.html', join('.', $permalinkParts) );
     }
 }
+
+/**
+ * Remove a directory and all of its contents
+ */
+function remove_dir( string $src ) {
+    if ( ! is_dir($src) ) return;
+
+    $dir = opendir($src);
+    while( false !== ( $file = readdir($dir) ) ) {
+        if ( ( $file != '.' ) && ( $file != '..' ) ) {
+            $full = $src . '/' . $file;
+            if ( is_dir($full) ) {
+                remove_dir($full);
+            }
+            else {
+                unlink($full);
+            }
+        }
+    }
+
+    closedir($dir);
+    rmdir($src);
+}
